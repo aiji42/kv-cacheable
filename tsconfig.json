@@ -3,6 +3,9 @@
     "target": "ES2019",
     "strict": true,
     "lib": ["ES2019"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "types": ["@cloudflare/workers-types"],
+    "declaration": true
   }
 }
