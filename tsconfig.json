@@ -5,7 +5,9 @@
     "lib": ["ES2019"],
     "skipLibCheck": true,
     "outDir": "dist",
-    "types": ["@cloudflare/workers-types"],
-    "declaration": true
-  }
+    "types": ["@cloudflare/workers-types", "jest"],
+    "declaration": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/index.ts"]
 }
