@@ -6,5 +6,9 @@
   "repository": "https://github.com/aiji42/kv-wrapper.git",
   "author": "aiji42 <aiji42@gmail.com> (https://twitter.com/aiji42_dev)",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "devDependencies": {
+    "@cloudflare/workers-types": "^3.4.0",
+    "typescript": "^4.6.2"
+  }
 }
