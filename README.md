@@ -30,15 +30,17 @@ import makeKVCacheable from 'kv-cacheable'
 const cacheable = makeKVCacheable(KV)
 
 export const loader = async () => {
-  const result = await cacheable(async () => {
-    // slow process
+  const slowCalculate = async () => {
+    // do something
     return 'calculation result'
-  }, 'cache-key')
+  }
+  const result = await cacheable(slowCalculate, 'cache-key')
   
   console.log(result) // => calculation result
 }
 ```
-If a value matching the key (the second argument) exists in KV, processing of the first argument is skipped.  
+
+If a value matching the key (second argument) exists in the KV, skip processing the first argument and return the cache.  
 If a cache matching the key does not exist, processing of the first argument is performed and the result is stored in KV.
 
 ### Type Information and Supplemental
