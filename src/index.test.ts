@@ -1,4 +1,4 @@
-import makeKVWrapper from "./index";
+import makeKVCacheable from "./index";
 
 const MockedKVGet = jest.fn()
 const MockedKVPut = jest.fn()
@@ -9,14 +9,14 @@ const KV = {
 
 const mockedConsoleLog = jest.spyOn(console, 'log').mockImplementation(() => {})
 
-describe("makeKVWrapper", () => {
+describe("makeKVCacheable", () => {
   beforeEach(() => {
     jest.resetAllMocks()
   })
 
   it('returns cached value if KV has the cache', async () => {
     MockedKVGet.mockResolvedValue('my cache')
-    const cacheable = makeKVWrapper(KV)
+    const cacheable = makeKVCacheable(KV)
     const result = await cacheable(() => 'no cache', 'my-cache-test')
 
     expect(MockedKVGet).toBeCalledWith('my-cache-test', 'json')
@@ -25,7 +25,7 @@ describe("makeKVWrapper", () => {
 
   it('puts cache value if KV does not have the cache',async () => {
     MockedKVGet.mockResolvedValue(null)
-    const cacheable = makeKVWrapper(KV)
+    const cacheable = makeKVCacheable(KV)
     const result = await cacheable(() => 'no cache', 'my-cache-test')
 
 
@@ -36,7 +36,7 @@ describe("makeKVWrapper", () => {
 
   test('the first argument is a async function',async () => {
     MockedKVGet.mockResolvedValue(null)
-    const cacheable = makeKVWrapper(KV)
+    const cacheable = makeKVCacheable(KV)
     const result = await cacheable(async () => 'no cache', 'my-cache-test')
 
 
@@ -47,7 +47,7 @@ describe("makeKVWrapper", () => {
 
   test('the first argument is a Promise',async () => {
     MockedKVGet.mockResolvedValue(null)
-    const cacheable = makeKVWrapper(KV)
+    const cacheable = makeKVCacheable(KV)
     const result = await cacheable(new Promise((resolve) => resolve('no cache')), 'my-cache-test')
 
 
@@ -59,7 +59,7 @@ describe("makeKVWrapper", () => {
   describe('the type of the controller (the 3rd argument) is function', () => {
     it('does not cache when "cacheable" is false',async () => {
       MockedKVGet.mockResolvedValue(null)
-      const cacheable = makeKVWrapper(KV)
+      const cacheable = makeKVCacheable(KV)
       const result = await cacheable(() => 'no cache', 'my-cache-test', (res) => res === 'no cache' ? { cacheable: false } : {})
 
 
@@ -70,7 +70,7 @@ describe("makeKVWrapper", () => {
 
     it('passed as an option to put except "cacheable"',async () => {
       MockedKVGet.mockResolvedValue(null)
-      const cacheable = makeKVWrapper(KV)
+      const cacheable = makeKVCacheable(KV)
       const result = await cacheable(() => 'no cache', 'my-cache-test', () => ({ cacheable: true, expirationTtl: 100 }))
 
 
@@ -83,7 +83,7 @@ describe("makeKVWrapper", () => {
   describe('the type of the controller (the 3rd argument) is object', () => {
     test('does not cache when "cacheable" is false',async () => {
       MockedKVGet.mockResolvedValue(null)
-      const cacheable = makeKVWrapper(KV)
+      const cacheable = makeKVCacheable(KV)
       const result = await cacheable(() => 'no cache', 'my-cache-test', { cacheable: false })
 
       expect(MockedKVGet).toBeCalledWith('my-cache-test', 'json')
@@ -93,7 +93,7 @@ describe("makeKVWrapper", () => {
 
     test('passed as an option to put except "cacheable"',async () => {
       MockedKVGet.mockResolvedValue(null)
-      const cacheable = makeKVWrapper(KV)
+      const cacheable = makeKVCacheable(KV)
       const result = await cacheable(() => 'no cache', 'my-cache-test', { cacheable: true, expirationTtl: 100 })
 
 
@@ -108,7 +108,7 @@ describe("makeKVWrapper", () => {
     })
     test('indicates that the cache has been hit', async () => {
       MockedKVGet.mockResolvedValue('my cache')
-      const cacheable = makeKVWrapper(KV, { debug: true })
+      const cacheable = makeKVCacheable(KV, { debug: true })
       await cacheable(() => 'no cache', 'my-cache-test')
 
       expect(mockedConsoleLog).toBeCalledWith("cache hit: ", 'my-cache-test')
@@ -116,7 +116,7 @@ describe("makeKVWrapper", () => {
 
     test('indicates that the cache has been put',async () => {
       MockedKVGet.mockResolvedValue(null)
-      const cacheable = makeKVWrapper(KV, { debug: true })
+      const cacheable = makeKVCacheable(KV, { debug: true })
       await cacheable(() => 'no cache', 'my-cache-test')
 
       expect(mockedConsoleLog).toBeCalledWith("cache set: ", 'my-cache-test')

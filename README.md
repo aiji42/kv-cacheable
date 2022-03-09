@@ -1,4 +1,4 @@
-# :key: kv-wrapper
+# :key: kv-cacheable
 
 ## What is this?
 
@@ -9,22 +9,22 @@ With a few lines of code, you can control the execution of functions that you wa
 
 ```bash
 # npm
-npm install kv-wrapper
+npm install kv-cacheable
 
 # yarn
-yarn add kv-wrapper
+yarn add kv-cacheable
 ```
 
 ## How to use
 
 0. [Set up KV](https://developers.cloudflare.com/workers/runtime-apis/kv/#kv-bindings) in advance.
-1. Create a wrapper using makeKVWrapper.
+1. Create a wrapper using makeKVCacheable.
 2. Set the process to be cached and the key to be used for caching in the wrapper function and execute it.
 ```js
 // Examples for use with Remix
-import makeKVWrapper from 'kv-wrapper'
+import makeKVCacheable from 'kv-cacheable'
 
-const cacheable = makeKVWrapper(KV)
+const cacheable = makeKVCacheable(KV)
 
 export const loader = async () => {
   const result = await cacheable(async () => {
@@ -40,7 +40,7 @@ If a cache matching the key does not exist, processing of the first argument is 
 
 ### Type Information and Supplemental
 
-**makeKVWrapper**
+**makeKVCacheable**
 - Arguments
     - The first: Your KV object (required)
     - The second: An option object (optional)
@@ -48,7 +48,7 @@ If a cache matching the key does not exist, processing of the first argument is 
 - Return (function): Wrapper function to control cache (see below).
 
 **cacheable wrapper function**  
-This is the return of makeKVWrapper.
+This is the return of makeKVCacheable.
 - Arguments
     - The first: Functions, asynchronous functions or Promises you want to cache and accelerate (required)
       - The return value must be a value that can be stringified with `JSON.stringify`.

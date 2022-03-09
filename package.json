@@ -1,9 +1,9 @@
 {
-  "name": "kv-wrapper",
+  "name": "kv-cacheable",
   "version": "1.0.0",
-  "description": "This is a wrapper library to make Cloudflare Workers KV easier to use.",
+  "description": "This is a library to make Cloudflare Workers KV easier to use.",
   "main": "index.js",
-  "repository": "https://github.com/aiji42/kv-wrapper.git",
+  "repository": "https://github.com/aiji42/kv-cacheable.git",
   "author": "aiji42 <aiji42@gmail.com> (https://twitter.com/aiji42_dev)",
   "license": "MIT",
   "private": false,

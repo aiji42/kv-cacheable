@@ -8,8 +8,8 @@ export type Option = {
   debug?: boolean
 }
 
-const makeKVWrapper =
-  (KV: KVNamespace, wrapperOption?: Option) =>
+const makeKVCacheable =
+  (KV: KVNamespace, option?: Option) =>
   async <T>(
     org: OriginalFunction<T> | Promise<T>,
     key: string,
@@ -19,20 +19,20 @@ const makeKVWrapper =
   ): Promise<T> => {
     const cache = await KV.get<T>(key, "json");
     if (cache) {
-      wrapperOption?.debug && console.log("cache hit: ", key);
+      option?.debug && console.log("cache hit: ", key);
       return cache;
     }
 
     const result = await (typeof org === "function" ? org() : org);
-    const { cacheable = true, ...option } =
+    const { cacheable = true, ...kvOption } =
       typeof controller === "function"
         ? await controller(result)
         : controller ?? {};
     if (cacheable) {
-      await KV.put(key, JSON.stringify(result), option);
-      wrapperOption?.debug && console.log("cache set: ", key);
+      await KV.put(key, JSON.stringify(result), kvOption);
+      option?.debug && console.log("cache set: ", key);
     }
     return result;
   };
 
-export default makeKVWrapper;
+export default makeKVCacheable;
