@@ -13,6 +13,7 @@
     "build": "tsc",
     "format": "prettier -w src",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "semantic-release": "semantic-release",
     "prepare": "husky install"
   },
