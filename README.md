@@ -46,7 +46,7 @@ If a cache matching the key does not exist, processing of the first argument is 
         - *debug*: boolean (optional): If set to true, logs are output when the cache is hit and set.
 - Return (function): Wrapper function to control cache (see below).
 
-**cacheable wrapper function**
+**cacheable wrapper function**  
 This is the return of makeKVWrapper.
 - Arguments
     - The first: Functions, asynchronous functions or Promises you want to cache and accelerate (required)
