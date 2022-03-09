@@ -4,8 +4,12 @@ export type KVOptions = {
   cacheable?: boolean;
 } & KVNamespacePutOptions;
 
+export type Option = {
+  debug?: boolean
+}
+
 const makeKVWrapper =
-  (KV: KVNamespace, debug = false) =>
+  (KV: KVNamespace, wrapperOption?: Option) =>
   async <T>(
     org: OriginalFunction<T> | Promise<T>,
     key: string,
@@ -15,7 +19,7 @@ const makeKVWrapper =
   ): Promise<T> => {
     const cache = await KV.get<T>(key, "json");
     if (cache) {
-      debug && console.log("cache hit: ", key);
+      wrapperOption?.debug && console.log("cache hit: ", key);
       return cache;
     }
 
@@ -26,7 +30,7 @@ const makeKVWrapper =
         : controller ?? {};
     if (cacheable) {
       await KV.put(key, JSON.stringify(result), option);
-      debug && console.log("cache set: ", key);
+      wrapperOption?.debug && console.log("cache set: ", key);
     }
     return result;
   };
