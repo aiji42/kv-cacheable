@@ -21,6 +21,7 @@ yarn add kv-wrapper
 1. Create a wrapper using makeKVWrapper.
 2. Set the process to be cached and the key to be used for caching in the wrapper function and execute it.
 ```js
+// Examples for use with Remix
 import makeKVWrapper from 'kv-wrapper'
 
 const cacheable = makeKVWrapper(KV)
@@ -31,7 +32,7 @@ export const loader = async () => {
     return 'calculation result'
   }, 'cache-key')
   
-  console.log(result) // > calculation result
+  console.log(result) // => calculation result
 }
 ```
 If a value matching the key (the second argument) exists in KV, processing of the first argument is skipped.  
@@ -61,11 +62,11 @@ This is the return of makeKVWrapper.
 - Return (Promise): The result of the execution of the function or promise set as the first argument, or the cache retrieved from KV.
 
 ```js
+// If exampleFunc does not return the correct value, do not cache it.
 const result = await cacheable(
   exampleFunc,
   'cache-key',
   // res is the value returned by exampleFunc.
-  // If exampleFunc does not return the correct value, do not cache it.
   (res) => isValid(res) ? { cacheable: true } : { cacheable: false }
 )
 ```
