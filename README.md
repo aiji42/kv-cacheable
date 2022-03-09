@@ -1,3 +1,6 @@
+[![codecov](https://codecov.io/gh/aiji42/kv-cacheable/branch/main/graph/badge.svg?token=CJ6FWDMVCC)](https://codecov.io/gh/aiji42/kv-cacheable)
+[![npm version](https://badge.fury.io/js/kv-cacheable.svg)](https://badge.fury.io/js/kv-cacheable)
+
 # :key: kv-cacheable
 
 ## What is this?
