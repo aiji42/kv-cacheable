@@ -8,6 +8,43 @@
 This library helps implement caching using [Cloudflare Workers KV](https://developers.cloudflare.com/workers/runtime-apis/kv/).  
 With a few lines of code, you can control the execution of functions that you want to cache for speed, store them in the cache, and skip execution of the function if the cache exists.
 
+### For example
+
+The following is an example of a process that requests data from a server. The process is cached to speed up the process.
+If KV has a prior cache, it will be retrieved and the fetching process will not be executed. If there is no cache, the fetch process is executed and the results are stored in the KV for future use. However, it is necessary to assume the possibility that the fetch may fail and avoid storing the result in KV if it is not a valid value.
+
+**Do not use `kv-cacheable` case**  
+This is redundant and uncool :weary:
+```js
+import { fetchSomeData, isValid } from 'libs/api'
+
+export const loader = async () => {
+  let result = await KV_NAMESPACE.get('cache-key', 'json')
+  if (!result) {
+    result = await fetchSomeData()
+    if (isValid(result)) {
+      KV_NAMESPACE.put('cache-key', JSON.stringify(result), { expiration: 3600 })
+    }
+  }
+  
+  // do something
+}
+```
+
+**Use `kv-cacheable` case**  
+This is simple and cool! :partying_face:
+```js
+import { fetchSomeData, isValid } from 'libs/api'
+import kvCacheable from 'kv-cacheable'
+
+const cacheable = kvCacheable(KV_NAMESPACE, { expiration: 3600 })
+
+export const loader = async () => {
+  const result = await cacheable('cache-key', cacheable, isValid)
+  // do something
+}
+```
+
 ## Install
 
 ```bash
