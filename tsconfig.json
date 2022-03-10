@@ -7,7 +7,8 @@
     "outDir": "dist",
     "types": ["@cloudflare/workers-types", "jest"],
     "declaration": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "removeComments": false
   },
   "include": ["src/index.ts"]
 }

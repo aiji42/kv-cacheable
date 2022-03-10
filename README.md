@@ -8,6 +8,43 @@
 This library helps implement caching using [Cloudflare Workers KV](https://developers.cloudflare.com/workers/runtime-apis/kv/).  
 With a few lines of code, you can control the execution of functions that you want to cache for speed, store them in the cache, and skip execution of the function if the cache exists.
 
+### For example
+
+The following is an example of a process that requests data from a server. The process is cached to speed up the process.
+If KV has a prior cache, it will be retrieved and the fetching process will not be executed. If there is no cache, the fetch process is executed and the results are stored in the KV for future use. However, it is necessary to assume the possibility that the fetch may fail and avoid storing the result in KV if it is not a valid value.
+
+**Do not use `kv-cacheable` case**  
+This is redundant and uncool :weary:
+```js
+import { fetchSomeData, isValid } from 'libs/api'
+
+export const loader = async () => {
+  let result = await KV_NAMESPACE.get('cache-key', 'json')
+  if (!result) {
+    result = await fetchSomeData()
+    if (isValid(result)) {
+      KV_NAMESPACE.put('cache-key', JSON.stringify(result), { expiration: 3600 })
+    }
+  }
+  
+  // do something
+}
+```
+
+**Use `kv-cacheable` case**  
+This is simple and cool! :partying_face:
+```js
+import { fetchSomeData, isValid } from 'libs/api'
+import kvCacheable from 'kv-cacheable'
+
+const cacheable = kvCacheable(KV_NAMESPACE, { expiration: 3600 })
+
+export const loader = async () => {
+  const result = await cacheable('cache-key', cacheable, isValid)
+  // do something
+}
+```
+
 ## Install
 
 ```bash
@@ -25,53 +62,61 @@ yarn add kv-cacheable
 2. Set the process to be cached and the key to be used for caching in the wrapper function and execute it.
 ```js
 // Examples for use with Remix
-import makeKVCacheable from 'kv-cacheable'
+import makeCacheable from 'kv-cacheable'
+import { exampleSlowCalculation } from '~/utils'
 
-const cacheable = makeKVCacheable(KV)
+const cacheable = makeCacheable(KV)
 
 export const loader = async () => {
-  const slowCalculate = async () => {
-    // do something
-    return 'calculation result'
-  }
-  const result = await cacheable(slowCalculate, 'cache-key')
+  const result = await cacheable('cache-key', exampleSlowCalculation)
   
-  console.log(result) // => calculation result
+  // ...
 }
 ```
 
-If a value matching the key (second argument) exists in the KV, skip processing the first argument and return the cache.  
-If a cache matching the key does not exist, processing of the first argument is performed and the result is stored in KV.
+If a value matching the key (first argument) exists in the KV, skip processing the second argument and return the cache.  
+If a cache matching the key does not exist, processing of the second argument is performed and the result is stored in KV as a cache.
 
 ### Type Information and Supplemental
 
-**makeKVCacheable**
+**makeCacheable**
 - Arguments
     - The first: Your KV object (required)
     - The second: An option object (optional)
         - *debug*: boolean (optional): If set to true, logs are output when the cache is hit and set.
+        - *[expiration](https://developers.cloudflare.com/workers/runtime-apis/kv/#creating-expiring-keys)*: number (optional): The cache expiration time.
+        - *[expirationTtl](https://developers.cloudflare.com/workers/runtime-apis/kv/#creating-expiring-keys)*: number (optional): The cache expiration time.
 - Return (function): Wrapper function to control cache (see below).
 
-**cacheable wrapper function**  
-This is the return of makeKVCacheable.
+**cacheable function**  
+This is the return of `makeCacheable`.
 - Arguments
-    - The first: Functions, asynchronous functions or Promises you want to cache and accelerate (required)
-      - The return value must be a value that can be stringified with `JSON.stringify`.
-    - The second: A key of cache (required)
-    - The third: Option value object or function that returns it (optional)  
-      When a function type is selected, the result of executing the function with the first argument is passed as an argument.  
-      - *cacheable*: boolean (optional): You can intentionally choose not to cache by setting false.
+    - The first: A key of cache (required)
+    - The second: Function, asynchronous function or Promise you want to cache and accelerate (required)
+        - The return value must be a value that can be stringified with `JSON.stringify`.
+    - The third: Option to control cache. Three types: boolean, object or function (optional)
+      - Type is boolean: You can intentionally choose not to cache by setting false.
+      - Type is object:
+        - *cacheable*: boolean (optional): You can intentionally choose not to cache by setting false.
+        - *[expiration](https://developers.cloudflare.com/workers/runtime-apis/kv/#creating-expiring-keys)*: number (optional): The cache expiration time.
+          - Overrides the value set by makeCacheable
+        - *[expirationTtl](https://developers.cloudflare.com/workers/runtime-apis/kv/#creating-expiring-keys)*: number (optional): The cache expiration time.
+          - Overrides the value set by makeCacheable
+      - Type is function: It takes the result of the execution of the second argument as the argument and returns the optional values (object or boolean) described above.
         - This is useful in cases where the function of the first argument can be expected to fail temporarily, such as when communicating with another server, to prevent the cache from being overwritten with its unexpected value.
-      - *[expiration](https://developers.cloudflare.com/workers/runtime-apis/kv/#creating-expiring-keys)*: number (optional): The cache expiration time.
-      - *[expirationTtl](https://developers.cloudflare.com/workers/runtime-apis/kv/#creating-expiring-keys)*: number (optional): The cache expiration time.
+        - See the example code below for details
 - Return (Promise): The result of the execution of the function or promise set as the first argument, or the cache retrieved from KV.
 
 ```js
-// If exampleFunc does not return the correct value, do not cache it.
+const isValid = (val) => {
+  // do validation
+  return boolean
+}
+
+// If fetchDataFromServer does not return the correct value, do not cache it.
 const result = await cacheable(
-  exampleFunc,
   'cache-key',
-  // res is the value returned by exampleFunc.
-  (res) => isValid(res) ? { cacheable: true } : { cacheable: false }
+  fetchDataFromServer,
+  (res) => isValid(res) // res is the value returned by exampleFunc
 )
 ```
