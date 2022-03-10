@@ -9,6 +9,9 @@
   "private": false,
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "format": "prettier -w src",
